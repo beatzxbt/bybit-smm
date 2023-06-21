@@ -54,23 +54,34 @@ class HTTP_PrivateRequests:
         self.baseheader['X-BAPI-SIGN'] = hash.hexdigest()
 
         async with aiohttp.ClientSession() as session:
-
-            if method == 'GET':
-                _req = await session.request("GET", base+endPoint, headers=self.baseheader, data=payload)
-                return _req
-
-            elif method == 'POST':
-                _req = await session.request("POST", base+endPoint, headers=self.baseheader, data=payload)
-                return _req
             
-            else:
-                print("Invalid request method!, select either 'GET' or 'POST'")
+            try: 
+                if method == 'GET':
+                    _req = await session.request("GET", base+endPoint, headers=self.baseheader, data=payload)
 
-            recv = json.dumps(_req.text)
+                elif method == 'POST':
+                    _req = await session.request("POST", base+endPoint, headers=self.baseheader, data=payload)
+     
+                else:
+                    print("Invalid request method!, select either 'GET' or 'POST'")
 
-            if recv['RetMsg'] == "OK":
-                pass
 
-            else:            
-                # Enter error handling here \
-                print(recv['RetMsg'])
+                recv = json.loads(await _req.text())
+
+                if recv['retMsg'] == "OK" or recv['retMsg'] == "success":
+                    pass
+
+                else:
+                    if recv['retMsg'] == "Too many visits!":
+                        print('Rate limits hit, cooling off...')
+                        return 'RATELIMITS'
+                
+                    else:            
+                        # Enter error handling here \
+                        print(recv['retMsg'])
+                    
+            except Exception as e:
+                print(e)
+
+            finally:
+                _close = await session.close()
