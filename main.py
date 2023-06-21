@@ -190,7 +190,7 @@ class Main:
         best_bid_price = 0.
 
         # Start all async futures, updating all global vars in the background \
-        _refreshparams = asyncio.create_task(refresh_parameters(param_dir, 0.1))
+        _refreshparams = asyncio.create_task(refresh_parameters(self.param_dir, 0.1))
         _accountfeed = asyncio.create_task(account_stats_feed(symbol))
         _volatilityfeed = asyncio.create_task(volatility_feed(symbol, '5', 5, 0))
         _sleep = await asyncio.sleep(1)   # Small timeout to let feeds warm up with data 
@@ -378,7 +378,7 @@ class Main:
                         _execution = await Order(self.api_key, self.api_secret, self.symbol).batch_orders(_orders)
 
                 # Run the strategy and refresh quotes if the mark price has changed \
-                if new_mark_price == mark_price:
+                if new_mark_price == self.mark_price:
                     pass
 
                 else:
@@ -407,8 +407,8 @@ class Main:
 if __name__ == "__main__":
 
     # Copy the directory of the param .yaml file and paste it below \
-    param_dir = ""
-    config_dir = ""
+    param_dir = "./src/parameters.yaml"
+    config_dir = "./config/bybit.yaml"
     
     _run = asyncio.run(Main('BTCUSDT', config_dir, param_dir).strategy())
 

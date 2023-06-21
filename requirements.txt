@@ -4,3 +4,4 @@ numpy==1.23.3
 pandas==1.5.0
 PyYAML==6.0
 PyYAML==6.0
+websockets=11.0.3

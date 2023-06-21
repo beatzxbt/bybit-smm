@@ -82,6 +82,7 @@ class HTTP_PrivateRequests:
                     
             except Exception as e:
                 print(e)
+                print(recv)
 
             finally:
                 _close = await session.close()

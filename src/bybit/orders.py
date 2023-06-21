@@ -80,6 +80,7 @@ class Order:
             
             except Exception as e:
                 print(e)
+                print(_batchresult)
 
             pass
 
@@ -111,6 +112,7 @@ class Order:
             
             except Exception as e:
                 print(e)
+                print(_singlesresult)
 
 
             # If there are orders remaining, send them through batch orders \
@@ -148,6 +150,7 @@ class Order:
 
                 except Exception as e:
                     print(e)
+                    print(_order)
 
 
 
@@ -268,6 +271,7 @@ class Order:
                 except Exception as e:
                     # Enter error handling here \
                     print(e)
+                    print(_order)
 
 
     async def cancel_all(self):
@@ -289,6 +293,7 @@ class Order:
 
         except Exception as e:
             print(e)
+            print(_resp)
 
 
     async def set_leverage(self, leverage: int):
@@ -312,3 +317,4 @@ class Order:
 
         except Exception as e:
             print(e)
+            print(_resp)
