@@ -86,7 +86,7 @@ class OrderTypesFutures(OrderBase):
 
 
     def limit(self, order):
-        return self.create_limit_payload(order[0], order[1], order[2])
+        return self.create_limit_payload(order[0], order[1], order[2], order[3] if len(order) > 3 else None)
 
 
     def market(self, order):
@@ -94,7 +94,7 @@ class OrderTypesFutures(OrderBase):
 
 
     def amend(self, order):
-        return self.create_amend_payload(order[0], order[1], order[2])
+        return self.create_amend_payload(order[0], order[1], order[2], order[3] if len(order) > 3 else None)
 
 
     def cancel(self, orderId):
