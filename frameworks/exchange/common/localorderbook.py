@@ -24,6 +24,13 @@ class BaseOrderBook:
 
         return asks_or_bids
 
+    def clear(self):
+        '''
+        Should only be used when the WebSocket connection is closed.
+        '''
+        self.asks = np.empty(shape=(0, 2), dtype=float)
+        self.bids = np.empty_like(self.asks)
+
 
     def process(self, recv):
         raise NotImplementedError("Derived classes should implement this method")

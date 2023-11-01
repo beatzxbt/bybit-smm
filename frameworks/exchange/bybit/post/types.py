@@ -23,7 +23,7 @@ class OrderBase:
         }
 
 
-    def create_limit_payload(self, side: str, price: str, qty: str) -> dict:
+    def create_limit_payload(self, side: str, price: str, qty: str, tp: str = None) -> dict:
         return {
             **self._base_payload(),
             "side": side,
@@ -31,6 +31,7 @@ class OrderBase:
             "price": price,
             "qty": qty,
             "timeInForce": "PostOnly",
+            **({"takeProfit": tp} if tp is not None else {})
         }
 
 
@@ -50,12 +51,13 @@ class OrderBase:
         }
 
 
-    def create_amend_payload(self, orderId: str, price: str, qty: str) -> dict:
+    def create_amend_payload(self, orderId: str, price: str, qty: str, tp: str = None) -> dict:
         return {
             **self._base_payload(), 
             "orderId": orderId, 
             "price": price,
-            "qty": qty
+            "qty": qty,
+            **({"takeProfit": tp} if tp is not None else {})
         }
 
 
