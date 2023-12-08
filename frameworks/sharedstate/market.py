@@ -3,7 +3,8 @@ from numpy_ringbuffer import RingBuffer
 
 class MarketDataSharedState:
 
-    def __init__(self, params) -> None:
+    ccxt_exchanges = {}
+    def __init__(self, params, exchange_id = None) -> None:
         self.binance_symbols, self.bybit_symbols, self.hyperlyquid_symbols = [], [], []
 
         exchange_handlers = {
@@ -17,7 +18,12 @@ class MarketDataSharedState:
 
         self.binance = self._create_exchange_dict(exchange_handlers["BINANCE"], self.binance_symbols)
         self.bybit = self._create_exchange_dict(exchange_handlers["BYBIT"], self.bybit_symbols)
-        self.hyperliquid = self._create_exchange_dict(exchange_handlers["HYPERLIQUID"], self.hyperlyquid_symbols)  
+        self.hyperliquid = self._create_exchange_dict(exchange_handlers["HYPERLIQUID"], self.hyperlyquid_symbols)
+        self.ccxt_exchanges = {
+            exchange_id: {
+                # self.symbol
+            }
+        } # check this later
 
     def _create_exchange_dict(self, handler_path, symbols):
             handler_class = self._dynamic_import(handler_path)
