@@ -29,7 +29,10 @@ class PrivateDataSharedState:
             "Data": {f"{symbol}": self._base_data_outline() for symbol in self.hyperliquid_symbols}
         }
 
-    
+        self.ccxt_exchanges = {
+              
+        }
+
     def _base_data_outline(self) -> dict:
         """
         Base dict for all exchange private data

@@ -12,17 +12,20 @@ from frameworks.sharedstate.private import PrivateDataSharedState
 from stink_biddor.strategy.arb import StinkBiddor
 from stink_biddor.settings import StrategyParameters
 
+from frameworks.exchange.ccxt.Exchange import Exchange
 
 class Strategy:
 
 
     def __init__(
-        self, 
-        mdss: MarketDataSharedState, 
+        self,
+        exchange: Exchange,
+        mdss: MarketDataSharedState,
         pdss: PrivateDataSharedState,
         strategy_params: StrategyParameters
     ) -> None:
 
+        self.exchange = exchange
         self.mdss = mdss
         self.pdss = pdss
         self.strategy = strategy_params
@@ -32,7 +35,7 @@ class Strategy:
         self.sleep_timer = 30
 
 
-    async def _max_pos_check(self) -> None:
+    async def _max_pos_check(self, exchange: Exchange) -> None:
         curr_pos = self.pdss.bybit["Data"][self.symbol]["position_size"]
 
         # If position exists, market out (assumes TP isnt filling in time)
@@ -40,36 +43,37 @@ class Strategy:
             self.logging.info(f"Outstanding delta of {curr_pos}, neutralizing...")
             side = "Buy" if curr_pos < 0 else "Sell"
             qty = round_step_size(nabs(curr_pos), self.mdss.bybit[self.symbol]["tick_size"])
-            await BybitOrder(self.pdss, self.symbol).order_market((side, qty))
+            # await BybitOrder(self.pdss, self.symbol).order_market((side, qty))
+            await exchange.order_market(self.symbol, side, qty)
             self.pdss.bybit["Data"][self.symbol]["position_size"] = 0
 
 
-    async def _max_order_check(self) -> None:
+    async def _max_order_check(self, exchange: Exchange) -> None:
         num_orders = len(self.pdss.bybit["Data"][self.symbol]["current_orders"])
 
         # If any orders, reset to empty state (no orders)
         if num_orders > 0:
-            await BybitOrder(self.pdss, self.symbol).cancel_all()
+            # await BybitOrder(self.pdss, self.symbol).cancel_all()
+            await exchange.cancel_all(self.symbol)
 
-        
     async def run(self) -> None:
         self.logging.info("Warming up data feeds...")
         await asyncio.sleep(5)
 
-        self.logging.info(f"Starting strategy with {len(self.strategy.stink_levels) * 2} levels...")
+        self.logging.info(f"Starting strategy with {len(self.strategy.stink_levels) * 2} levels... for {self.exchange.id} with {self.symbol}")
 
         while True:
             # Perform checks before starting new iteration
-            await self._max_order_check()
-            await self._max_pos_check()
+            await self._max_order_check(self.exchange)
+            await self._max_pos_check(self.exchange)
             await asyncio.sleep(0.5)
             
             tasks = []
 
             # Spawn individual tasks for different levels
             for levels in self.strategy.stink_levels:
-                tasks.append(asyncio.create_task(StinkBiddor(self.mdss, self.pdss, self.symbol, levels).buy()))
-                tasks.append(asyncio.create_task(StinkBiddor(self.mdss, self.pdss, self.symbol, levels).sell()))
+                tasks.append(asyncio.create_task(StinkBiddor(self.mdss, self.pdss, self.symbol, levels, self.exchange).buy()))
+                tasks.append(asyncio.create_task(StinkBiddor(self.mdss, self.pdss, self.symbol, levels, self.exchange).sell()))
 
             await asyncio.sleep(self.sleep_timer)
             
